@@ -11,7 +11,6 @@ class tracked_person():
         self.hands_above_head_state = False
         self.arms_straight_state = False
         self.legs_straight_state = False
-        self.is_pose_1_state = False
 
         #angles
         self.angle_between_arms = 0
@@ -46,12 +45,8 @@ class tracked_person():
         self.landmarks = landmarks
     
     def update_pose_landmarks_to_dict(self):
-        """Save pose landmarks to a JSON file."""
-        # Create a dictionary to hold the landmark data
         landmarks_data = []
-
-        # Assuming pose_landmarker_result contains landmarks in a certain format
-        for landmark in self.landmarks:  # Adjust this based on your actual result structure
+        for landmark in self.landmarks:
             landmark_data = {
                 'x': landmark.x,
                 'y': landmark.y,
@@ -60,10 +55,8 @@ class tracked_person():
             }
             landmarks_data.append(landmark_data)
 
-        # Create a final dictionary
         self.landmarks_as_dict = {
             'landmarks': landmarks_data,
-            # Include any other relevant attributes from pose_landmarker_result
         }
     
     def save_to_json(self, file_name):
@@ -78,13 +71,13 @@ class tracked_person():
             self.hands_above_head_state = False
     
     def arms_straight(self):
-        if(self.left_arm_straightness_angle > 140 and self.right_arm_straightness_angle > 140):
+        if(self.left_arm_straightness_angle > ARM_STRAIGHTNESS_MIN_ANGLE and self.right_arm_straightness_angle > ARM_STRAIGHTNESS_MIN_ANGLE):
             self.arms_straight_state = True
         else:
             self.arms_straight_state = False
     
     def legs_straight(self):
-        if(self.left_leg_straightness_angle > 150 and self.right_leg_straightness_angle > 150):
+        if(self.left_leg_straightness_angle > LEG_STRAIGHTNESS_MIN_ANGLE and self.right_leg_straightness_angle > LEG_STRAIGHTNESS_MIN_ANGLE):
             self.legs_straight_state = True
         else:
             self.legs_straight_state = False
@@ -102,13 +95,6 @@ class tracked_person():
         self.right_arm_raise_angle = calculate_angle([self.landmarks[self.mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,self.landmarks[self.mp_pose.PoseLandmark.RIGHT_ELBOW.value].y], [self.landmarks[self.mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,self.landmarks[self.mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y], [self.landmarks[self.mp_pose.PoseLandmark.RIGHT_HIP.value].x,self.landmarks[self.mp_pose.PoseLandmark.RIGHT_HIP.value].y])
 
         self.left_to_right_shoulder_angle = calculate_angle([self.landmarks[self.mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,self.landmarks[self.mp_pose.PoseLandmark.LEFT_SHOULDER.value].y], [self.landmarks[self.mp_pose.PoseLandmark.NOSE.value].x,self.landmarks[self.mp_pose.PoseLandmark.NOSE.value].y], [self.landmarks[self.mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,self.landmarks[self.mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y])
-
-    
-    def is_pose_1(self):
-        if(self.hands_above_head_state and self.arms_straight_state and self.legs_straight_state and self.angle_between_arms > 50 and self.angle_between_arms < 120):
-            self.is_pose_1_state = True
-        else:
-            self.is_pose_1_state = False
 
 
     #When we get rid of the booleans (Maybe?) this can just be reduced to calculate angles

@@ -6,10 +6,14 @@ from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmark
 MO_CAP_CAMERA_TIMER = 5 #Seconds
 MACOS_HANDOFF_CAMERA_OVERRIDE = True #Default true, false if you want handoff to iPhone camera
 
+#If we get rid of the booleans these variables can go away
+ARM_STRAIGHTNESS_MIN_ANGLE = 140
+LEG_STRAIGHTNESS_MIN_ANGLE = 150
+
 def calculate_angle(first,middle,last):
-    a = np.array(first) # First
-    b = np.array(middle) # Mid
-    c = np.array(last) # End
+    a = np.array(first)
+    b = np.array(middle)
+    c = np.array(last)
         
     radians = np.arctan2(c[1]-b[1], c[0]-b[0]) - np.arctan2(a[1]-b[1], a[0]-b[0])
     angle = np.abs(radians*180.0/np.pi)
@@ -38,7 +42,6 @@ def calculate_score(tracked_guy, desired_pose):
     return score
 
 def parse_pose_landmarks_from_json(file_name: str) -> List[NormalizedLandmark]:
-    """Parse pose landmarks from a JSON file and return a list of NormalizedLandmark objects."""
     with open(file_name, 'r') as json_file:
         data = json.load(json_file)
     
@@ -55,7 +58,7 @@ def parse_pose_landmarks_from_json(file_name: str) -> List[NormalizedLandmark]:
             )
             normalized_landmarks.append(landmark)
         else:
-            print(f"Expected dict but got: {type(landmark_data)}")  # Error handling
+            print(f"Expected dict but got: {type(landmark_data)}") #lol thanks i guess chatgpt
 
     return normalized_landmarks
 
@@ -115,7 +118,5 @@ def create_status_bar(percentage):
 
     # Fill the filled portion with white color (255, 255, 255) and full opacity (255)
     image[:, :filled_width] = [255, 255, 255, 255]  # White with full opacity
-
-    # The rest remains transparent (0, 0, 0, 0)
     
     return image
