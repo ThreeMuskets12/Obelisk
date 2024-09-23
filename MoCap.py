@@ -4,7 +4,7 @@ import numpy as np
 import logging
 import time
 
-from Common import add_transparent_image, calculate_error, create_status_bar
+from Common import *
 from TrackedPerson import tracked_person
 from mediapipe.framework.formats.landmark_pb2 import Landmark
 
@@ -74,7 +74,7 @@ with Person.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0
             shutter = True
         
         if shutter == True:
-            if time.time() - start_time > 5:
+            if time.time() - start_time > MO_CAP_CAMERA_TIMER:
                 Person.update_pose_landmarks_to_dict()
                 Person.save_to_json('Pose1.json')
                 cap.release()

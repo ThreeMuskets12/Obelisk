@@ -1,8 +1,10 @@
 import numpy as np
 from typing import List, Optional
 import json
-
 from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmark
+
+MO_CAP_CAMERA_TIMER = 5 #Seconds
+MACOS_HANDOFF_CAMERA_OVERRIDE = True #Default true, false if you want handoff to iPhone camera
 
 def calculate_angle(first,middle,last):
     a = np.array(first) # First
@@ -15,6 +17,25 @@ def calculate_angle(first,middle,last):
     if angle >180.0:
         angle = 360-angle        
     return angle
+
+def calculate_score(tracked_guy, desired_pose):
+    angle_between_arms_error = calculate_error(tracked_guy.angle_between_arms, desired_pose.angle_between_arms)
+    
+    left_arm_straightness_angle_error = calculate_error(tracked_guy.left_arm_straightness_angle, desired_pose.left_arm_straightness_angle)
+    right_arm_straightness_angle_error = calculate_error(tracked_guy.right_arm_straightness_angle, desired_pose.right_arm_straightness_angle)
+
+    left_leg_straightness_angle_error = calculate_error(tracked_guy.left_leg_straightness_angle, desired_pose.left_leg_straightness_angle)
+    right_leg_straightness_angle_error = calculate_error(tracked_guy.right_leg_straightness_angle, desired_pose.right_leg_straightness_angle)
+
+    left_arm_raise_angle_error = calculate_error(tracked_guy.left_arm_raise_angle, desired_pose.left_arm_raise_angle)
+    right_arm_raise_angle_error = calculate_error(tracked_guy.right_arm_raise_angle, desired_pose.right_arm_raise_angle)
+
+    
+    error_array = [angle_between_arms_error, left_arm_straightness_angle_error, right_arm_straightness_angle_error, left_leg_straightness_angle_error, right_leg_straightness_angle_error, left_arm_raise_angle_error, right_arm_raise_angle_error]
+
+    score = 100 - np.mean(error_array)
+
+    return score
 
 def parse_pose_landmarks_from_json(file_name: str) -> List[NormalizedLandmark]:
     """Parse pose landmarks from a JSON file and return a list of NormalizedLandmark objects."""
