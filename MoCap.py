@@ -60,12 +60,15 @@ with Person.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0
 
             segmentation_mask = results.segmentation_mask
             segmentation_mask = (segmentation_mask * 255).astype(np.uint8)
-            segmentation_mask_mono = rgb_array = cv2.cvtColor(segmentation_mask, cv2.COLOR_GRAY2BGR)
+            segmentation_mask_mono = cv2.cvtColor(segmentation_mask, cv2.COLOR_GRAY2BGR)
             image = segmentation_mask_mono
             print(segmentation_mask_mono.shape)
             Person.set_landmarks(landmarks)
             Person.update()
         except:
+            segmentation_mask = np.zeros((1080, 1920), dtype=np.uint8)  # 1080 rows and 1920 columns
+            segmentation_mask_mono = cv2.cvtColor(segmentation_mask, cv2.COLOR_GRAY2BGR)
+            image = segmentation_mask_mono
             pass
         
         # Render detections
