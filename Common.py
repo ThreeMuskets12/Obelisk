@@ -1,4 +1,8 @@
 import numpy as np
+from typing import List, Optional
+import json
+
+from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmark
 
 def calculate_angle(first,middle,last):
     a = np.array(first) # First
@@ -11,6 +15,28 @@ def calculate_angle(first,middle,last):
     if angle >180.0:
         angle = 360-angle        
     return angle
+
+def parse_pose_landmarks_from_json(file_name: str) -> List[NormalizedLandmark]:
+    """Parse pose landmarks from a JSON file and return a list of NormalizedLandmark objects."""
+    with open(file_name, 'r') as json_file:
+        data = json.load(json_file)
+    
+    normalized_landmarks = []
+    
+    for landmark_data in data['landmarks']:
+        if isinstance(landmark_data, dict):  # Ensure landmark_data is a dict
+            landmark = NormalizedLandmark(
+                x=landmark_data.get('x'),
+                y=landmark_data.get('y'),
+                z=landmark_data.get('z'),
+                visibility=landmark_data.get('visibility'),
+                presence=landmark_data.get('presence')  # Optional attribute
+            )
+            normalized_landmarks.append(landmark)
+        else:
+            print(f"Expected dict but got: {type(landmark_data)}")  # Error handling
+
+    return normalized_landmarks
 
 def add_transparent_image(background, foreground, x_offset=None, y_offset=None):
         bg_h, bg_w, bg_channels = background.shape

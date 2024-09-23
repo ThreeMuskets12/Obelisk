@@ -2,15 +2,18 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import logging
+import time
 
 from Common import add_transparent_image, calculate_error, create_status_bar
 from TrackedPerson import tracked_person
+from mediapipe.framework.formats.landmark_pb2 import Landmark
+
 
 logging.basicConfig(
     level=logging.DEBUG,  # Set the logging level
     format='%(asctime)s - %(levelname)s - %(message)s',  # Customize the output format
     handlers=[
-        logging.FileHandler('app.log'),  # Log to a file
+        logging.FileHandler('log.txt'),  # Log to a file
         logging.StreamHandler()  # Log to the console
     ]
 )
@@ -19,6 +22,8 @@ logger = logging.getLogger(__name__)
 cap = cv2.VideoCapture(0)
 mp_drawing = mp.solutions.drawing_utils
 Person = tracked_person()
+
+shutter = False
 ## Setup mediapipe instance
 
 with Person.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
@@ -38,7 +43,8 @@ with Person.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0
         # Extract landmarks
         try:
             landmarks = results.pose_landmarks.landmark
-            Person.update(landmarks) #There is something wrong with Person.update
+            Person.set_landmarks(landmarks)
+            Person.update() #There is something wrong with Person.update
         except:
             pass
 
@@ -55,8 +61,6 @@ with Person.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0
                                 mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2) 
                                  )
                        
-        #image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        #image = cv2.cvtColor(image, cv2.COLOR_RGBA2BGR)
         cv2.imshow('Mediapipe Feed', image)
 
         press = cv2.waitKey(10) & 0xFF
@@ -66,8 +70,16 @@ with Person.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0
 
         if press == ord('c'):
             #Record pose
-            #logger.info("NOSE " + str(Person))
-            Person.save_to_json('tracked_person.json')
+            start_time = time.time()
+            shutter = True
+        
+        if shutter == True:
+            if time.time() - start_time > 5:
+                Person.update_pose_landmarks_to_dict()
+                Person.save_to_json('Pose1.json')
+                cap.release()
+                cv2.destroyAllWindows()
+                break
 
 
     cap.release()
