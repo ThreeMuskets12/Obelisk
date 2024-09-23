@@ -4,8 +4,10 @@ import mediapipe as mp
 import json
 
 class tracked_person():
-    def __init__(self, landmarks = None):
+    def __init__(self, landmarks = None, image = None):
         self.landmarks = landmarks
+
+        self.image = image #The idea here is that for a regular tracked person this stays none, but for a recorded pose this becomes the path to the image
 
         #Boolean flags, ideally we can get rid of these in favor of our magical friends the angles soon
         self.hands_above_head_state = False
