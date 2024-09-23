@@ -21,9 +21,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 if MACOS_HANDOFF_CAMERA_OVERRIDE == True:
-    try:
-        cap = cv2.VideoCapture(1)
-    except:
+    cap = cv2.VideoCapture(1)
+    if not cap.isOpened():
         cap = cv2.VideoCapture(0)
 else:
     cap = cv2.VideoCapture(0)
@@ -37,9 +36,11 @@ pose_2_image = cv2.resize(pose_2_image, (540, 1017))
 pose_2_image = cv2.cvtColor(pose_2_image, cv2.COLOR_BGRA2RGBA)
 
 shutter = False
+segmentation_mask = np.zeros((1080, 1920), dtype=np.uint8)  # 1080 rows and 1920 columns
+segmentation_mask_mono = cv2.cvtColor(segmentation_mask, cv2.COLOR_GRAY2BGR)
 ## Setup mediapipe instance
 
-with Person.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+with Person.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, enable_segmentation=True) as pose:
     while cap.isOpened():
         ret, frame = cap.read()
         
@@ -56,6 +57,12 @@ with Person.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0
         # Extract landmarks
         try:
             landmarks = results.pose_landmarks.landmark
+
+            segmentation_mask = results.segmentation_mask
+            segmentation_mask = (segmentation_mask * 255).astype(np.uint8)
+            segmentation_mask_mono = rgb_array = cv2.cvtColor(segmentation_mask, cv2.COLOR_GRAY2BGR)
+            image = segmentation_mask_mono
+            print(segmentation_mask_mono.shape)
             Person.set_landmarks(landmarks)
             Person.update()
         except:
@@ -68,7 +75,7 @@ with Person.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0
                                  )
         
         image = cv2.flip(image, 1)
-        
+
                 # Rep data
         cv2.putText(image, 'angle_between_arms', (15,12), 
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
