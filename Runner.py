@@ -23,6 +23,9 @@ if MACOS_HANDOFF_CAMERA_OVERRIDE == True:
 else:
     cap = cv2.VideoCapture(0)
 
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+
 pose_1_image = cv2.imread('Poses/Pose1/Pose1.png', cv2.IMREAD_UNCHANGED)
 pose_1_image = cv2.resize(pose_1_image, (686, 1000))
 pose_1_image = cv2.cvtColor(pose_1_image, cv2.COLOR_BGRA2RGBA)
@@ -93,6 +96,9 @@ with Person.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0
 
         if(score > 95):
             TargetPoseArrayIndex = TargetPoseArrayIndex + 1
+            if TargetPoseArrayIndex > 1:
+                TargetPoseArrayIndex = 0
+
 
         if cv2.waitKey(10) & 0xFF == ord('q'):
             break

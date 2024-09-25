@@ -31,13 +31,13 @@ mp_drawing = mp.solutions.drawing_utils
 Person = tracked_person()
 
 
-pose_2_image = cv2.imread('Poses/Pose2/Pose2.png', cv2.IMREAD_UNCHANGED)
-pose_2_image = cv2.resize(pose_2_image, (540, 1017))
-pose_2_image = cv2.cvtColor(pose_2_image, cv2.COLOR_BGRA2RGBA)
+#pose_2_image = cv2.imread('Poses/Pose2/Pose2.png', cv2.IMREAD_UNCHANGED)
+#pose_2_image = cv2.resize(pose_2_image, (540, 1017))
+#pose_2_image = cv2.cvtColor(pose_2_image, cv2.COLOR_BGRA2RGBA)
 
 shutter = False
-segmentation_mask = np.zeros((1080, 1920), dtype=np.uint8)  # 1080 rows and 1920 columns
-segmentation_mask_mono = cv2.cvtColor(segmentation_mask, cv2.COLOR_GRAY2BGR)
+#segmentation_mask = np.zeros((1080, 1920), dtype=np.uint8)  # 1080 rows and 1920 columns
+#segmentation_mask_mono = cv2.cvtColor(segmentation_mask, cv2.COLOR_GRAY2BGR)
 ## Setup mediapipe instance
 
 with Person.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, enable_segmentation=True) as pose:
@@ -58,37 +58,37 @@ with Person.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0
         try:
             landmarks = results.pose_landmarks.landmark
 
-            segmentation_mask = results.segmentation_mask
-            segmentation_mask = (segmentation_mask * 255).astype(np.uint8)
-            segmentation_mask_mono = cv2.cvtColor(segmentation_mask, cv2.COLOR_GRAY2BGR)
-            image = segmentation_mask_mono
-            print(segmentation_mask_mono.shape)
+            #segmentation_mask = results.segmentation_mask
+            #segmentation_mask = (segmentation_mask * 255).astype(np.uint8)
+            #segmentation_mask_mono = cv2.cvtColor(segmentation_mask, cv2.COLOR_GRAY2BGR)
+            #image = segmentation_mask_mono
+            #print(segmentation_mask_mono.shape)
             Person.set_landmarks(landmarks)
             Person.update()
         except:
-            segmentation_mask = np.zeros((1080, 1920), dtype=np.uint8)  # 1080 rows and 1920 columns
-            segmentation_mask_mono = cv2.cvtColor(segmentation_mask, cv2.COLOR_GRAY2BGR)
-            image = segmentation_mask_mono
+            #segmentation_mask = np.zeros((1080, 1920), dtype=np.uint8)  # 1080 rows and 1920 columns
+            #segmentation_mask_mono = cv2.cvtColor(segmentation_mask, cv2.COLOR_GRAY2BGR)
+            #image = segmentation_mask_mono
             pass
         
         # Render detections
-        mp_drawing.draw_landmarks(image, results.pose_landmarks, Person.mp_pose.POSE_CONNECTIONS,
+        """mp_drawing.draw_landmarks(image, results.pose_landmarks, Person.mp_pose.POSE_CONNECTIONS,
                                 mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=2), 
                                 mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2) 
-                                 )
+                                 )"""
         
         image = cv2.flip(image, 1)
 
                 # Rep data
-        cv2.putText(image, 'angle_between_arms', (15,12), 
+        """cv2.putText(image, 'angle_between_arms', (15,12), 
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1, cv2.LINE_AA)
         cv2.putText(image, str(Person.angle_between_arms), 
                     (10,60), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 2, cv2.LINE_AA)
+                    cv2.FONT_HERSHEY_SIMPLEX, 2, (255,255,255), 2, cv2.LINE_AA)"""
         
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        add_transparent_image(image, pose_2_image, 1300, 80)
-        image = cv2.cvtColor(image, cv2.COLOR_RGBA2BGR)
+        #image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        #add_transparent_image(image, pose_2_image, 1300, 80)
+        #image = cv2.cvtColor(image, cv2.COLOR_RGBA2BGR)
         cv2.imshow('Mediapipe Feed', image)
 
         press = cv2.waitKey(10) & 0xFF
@@ -104,7 +104,8 @@ with Person.mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0
         if shutter == True:
             if time.time() - start_time > MO_CAP_CAMERA_TIMER:
                 Person.update_pose_landmarks_to_dict()
-                Person.save_to_json('Pose2.json')
+                Person.save_to_json('output_pose.json')
+                cv2.imwrite('output_image.png', image)
                 cap.release()
                 cv2.destroyAllWindows()
                 break
